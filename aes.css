@@ -1,0 +1,43 @@
+h2 {font-size:1.2rem;margin-top:2rem} h3 {font-size:1rem}
+.aes-note {padding:1rem;border-left:3px solid #0550ae;background:#f2f6fc;color:#30415a}
+.aes-matrices {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.5rem}
+.aes-grid {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.35rem;max-width:20rem}
+.aes-byte {padding:.7rem .3rem;text-align:center;border:1px solid #ddd;background:white;border-radius:6px;font-family:monospace;font-size:1.15rem}
+.aes-byte.changed {background:#f8eeee;color:#9a1f1f;border-color:#dbaaaa;animation:pop .25s ease}
+.aes-byte.selected {outline:3px solid #0550ae;outline-offset:1px}
+.aes-calculation,.source {white-space:pre-wrap;overflow-wrap:anywhere;padding:1rem;background:#fff;border:1px solid #ddd;font:14px/1.7 monospace}
+.aes-hex {font-family:monospace;overflow-wrap:anywhere}
+#step {width:100%;accent-color:#0550ae} select {font:inherit;padding:.5rem;border:1px solid #ccc;border-radius:6px;background:white}
+button:focus-visible,a:focus-visible {outline:3px solid #0550ae;outline-offset:3px}
+@media(max-width:720px){.aes-matrices{grid-template-columns:1fr}.page{padding:1rem}.aes-grid{max-width:100%}}
+@media(prefers-reduced-motion:reduce){.aes-byte.changed{animation:none}}
+/* Ayrıntılı AES dersi */
+[hidden] {display:none !important}
+.lesson-controls {margin-bottom:.8rem}
+.lesson-navigation {display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem}
+.lesson-navigation button {border-radius:7px;padding:.5rem .8rem}
+.lesson-kicker {color:#0550ae;font-size:.9rem}
+.lesson-explanation {font-size:1.08rem;max-width:70rem}
+.lesson-cards {display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}
+.lesson-card {flex:1;min-width:140px;background:white;padding:1rem;border:1px solid #d9e1ef;border-radius:10px}
+.lesson-card span {display:block;color:#64748b;font-size:.85rem}
+.lesson-card strong {display:block;font-family:monospace;font-size:1.3rem;margin-top:.4rem;overflow-wrap:anywhere}
+.lesson-table-wrap {max-width:100%;overflow-x:auto;margin:1rem 0}
+.lesson-table {border-collapse:collapse;width:100%;background:white;text-align:left;font:14px/1.6 monospace}
+.lesson-table td,.lesson-table th {padding:.6rem .8rem;border:1px solid #e1e6ef;white-space:nowrap}
+.lesson-table th {font-family:system-ui,sans-serif;background:#eef2f8}
+.lesson-table .active-row {background:#dceafb;color:#073c83;font-weight:bold;box-shadow:inset 3px 0 #0550ae}
+.aes-byte.source-byte {background:#dceafb;border-color:#73a3dc;color:#073c83}
+.lesson-muted,#matrix-hint {color:#64748b;font-size:.9rem}
+.sbox-table {width:auto}.sbox-table td,.sbox-table th {padding:.3rem .5rem;text-align:center}
+#sbox-panel,#key-details-panel {margin:1rem 0;padding:.8rem;border:1px solid #ccd7e5;border-radius:8px;background:#fff}
+summary {cursor:pointer;font-weight:600}#title {margin-top:.5rem}
+#details,#calculation {line-height:1.85}
+@media(max-width:720px){.lesson-controls label,.lesson-controls select{width:100%}.lesson-table td,.lesson-table th{padding:.4rem .5rem}.lesson-card{min-width:100px}.lesson-navigation{gap:.35rem}.lesson-navigation button{font-size:.9rem}}
+.lesson-navigation {position:sticky;top:0;z-index:5;background:#fafafa;padding:.65rem 0;border-bottom:1px solid #e1e6ef}
+
+@media(max-width:720px){.lesson-navigation{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}.lesson-navigation button{padding:.5rem .2rem;font-size:.82rem;white-space:nowrap}}
+
+.aes-matrices.single-matrix {grid-template-columns:minmax(0,1fr)}
+.aes-matrices.two-matrices {grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:720px){.aes-matrices.two-matrices{grid-template-columns:1fr}}

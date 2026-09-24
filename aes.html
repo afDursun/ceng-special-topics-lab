@@ -1,0 +1,253 @@
+<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>AES notebook</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="aes.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/lib/codemirror.min.css"></head><body class="lab"><main class="page"><a class="back" href="index.html">Lab</a><h1>3. AES şifreleme</h1><p class="lead"><a href="aes_animation.html">Animasyonu aç</a> · <a href="aes_core.py" download>Tam Python kodunu indirmek için tıklayınız</a></p><p class="aes-note">Bu yalnızca bir eğitim örneğidir.</p><p id="status" class="status">Python yükleniyor…</p><p class="actions"><button id="run-all" disabled>Tümünü çalıştır</button></p><h2>1. Doğrudan şifrele ve çöz</h2><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">text = &quot;merhaba&quot;
+key = b&quot;0123456789abcdef&quot;
+ciphertext = aes_encrypt(text, key)
+decrypted = aes_decrypt(ciphertext, key)
+print(&quot;Açık metin :&quot;, text)
+print(&quot;Anahtar    :&quot;, key.decode())
+print(&quot;Şifre (hex):&quot;, ciphertext.hex())
+print(&quot;Çözülmüş   :&quot;, decrypted)
+assert decrypted == text</textarea><div class="out" hidden></div></article><h2>2. Metinden baytlara ve dolguya</h2><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">raw = text.encode(&quot;utf-8&quot;)
+padded = pad(raw)
+print(&quot;UTF-8:&quot;, raw.hex(&quot; &quot;))
+print(&quot;Bayt sayısı:&quot;, len(raw))
+print(&quot;Dolgu sayısı:&quot;, 16 - len(raw) % 16)
+print(&quot;Dolgulu veri:&quot;, padded.hex(&quot; &quot;))
+print(&quot;İlk blok, sütun öncelikli 4×4 state:&quot;)
+show_state(padded[:16])</textarea><div class="out" hidden></div></article><h2>3. Anahtarı 11 tur anahtarına genişlet</h2><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">keys = expand_key(key)
+for r, round_key in enumerate(keys):
+    print(f&quot;K{r:02}:&quot;, bytes(round_key).hex(&quot; &quot;))
+word = list(key[12:16])
+rotated = word[1:] + word[:1]
+substituted = [SBOX[x] for x in rotated]
+with_rcon = substituted.copy()
+with_rcon[0] ^= 1
+print(&quot;Son kelime:&quot;, bytes(word).hex(&quot; &quot;))
+print(&quot;RotWord   :&quot;, bytes(rotated).hex(&quot; &quot;))
+print(&quot;SubWord   :&quot;, bytes(substituted).hex(&quot; &quot;))
+print(&quot;Rcon XOR  :&quot;, bytes(with_rcon).hex(&quot; &quot;))
+print(&quot;Yeni kelime:&quot;, bytes(a ^ b for a,b in zip(key[:4], with_rcon)).hex(&quot; &quot;))</textarea><div class="out" hidden></div></article><h2>4. Başlangıç: AddRoundKey</h2><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">state = list(padded[:16])
+print(f&quot;İlk bayt: {state[0]:02x} XOR {keys[0][0]:02x} = {state[0] ^ keys[0][0]:02x}&quot;)
+print(f&quot;Bitlerle : {state[0]:08b} XOR {keys[0][0]:08b} = {state[0] ^ keys[0][0]:08b}&quot;)
+state = add_round_key(state, keys[0])
+show_state(state)</textarea><div class="out" hidden></div></article><h2>5. SubBytes: her baytı S-box ile değiştir</h2><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">print(&quot;Önce (SubBytes yok):&quot;)
+show_state(state)
+
+before = state.copy()
+
+# Örnek: ilk baytı elle S-box&#x27;tan oku
+b = before[0]
+row = b &gt;&gt; 4          # üst 4 bit = satır
+col = b &amp; 0x0f        # alt 4 bit = sütun
+print()
+print(f&quot;Örnek bayt: {b:02x}&quot;)
+print(f&quot;  satır = {row:x}, sütun = {col:x}&quot;)
+print(f&quot;  SBOX[{b:02x}] = {SBOX[b]:02x}&quot;)
+
+print()
+print(&quot;Sıra\tÖnce\tSonra&quot;)
+for i, x in enumerate(before[:8]):
+    print(f&quot;{i}\t{x:02x}\t{SBOX[x]:02x}&quot;)
+
+state = sub_bytes(state)
+
+print()
+print(&quot;Sonra (her bayt S-box ile değişti):&quot;)
+show_state(state)</textarea><div class="out" hidden></div></article><h2>6. ShiftRows: satırları sola döndür</h2><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">print(&quot;Önce:&quot;)
+show_state(state)
+state = shift_rows(state)
+print(&quot;Sonra:&quot;)
+show_state(state)</textarea><div class="out" hidden></div></article><h2>7. MixColumns: her sütunu karıştır</h2><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">print(&quot;Önce (MixColumns yok):&quot;)
+show_state(state)
+
+# İlk sütun: a,b,c,d (yukarıdan aşağıya)
+a, b, c, d = state[0], state[1], state[2], state[3]
+print()
+print(f&quot;İlk sütun: {a:02x}  {b:02x}  {c:02x}  {d:02x}&quot;)
+print()
+print(&quot;Sabit matris (her sütun için):&quot;)
+print(&quot;  [02 03 01 01]&quot;)
+print(&quot;  [01 02 03 01]&quot;)
+print(&quot;  [01 01 02 03]&quot;)
+print(&quot;  [03 01 01 02]&quot;)
+print()
+print(&quot;Toplama = XOR, çarpma = gf_mul (AES alanı)&quot;)
+print()
+
+y0 = gf_mul(2, a) ^ gf_mul(3, b) ^ c ^ d
+y1 = a ^ gf_mul(2, b) ^ gf_mul(3, c) ^ d
+y2 = a ^ b ^ gf_mul(2, c) ^ gf_mul(3, d)
+y3 = gf_mul(3, a) ^ b ^ c ^ gf_mul(2, d)
+
+print(&quot;İlk sütunun yeni değerleri:&quot;)
+print(f&quot;  y0 = 02·{a:02x} XOR 03·{b:02x} XOR {c:02x} XOR {d:02x} = {y0:02x}&quot;)
+print(f&quot;  y1 = {a:02x} XOR 02·{b:02x} XOR 03·{c:02x} XOR {d:02x} = {y1:02x}&quot;)
+print(f&quot;  y2 = {a:02x} XOR {b:02x} XOR 02·{c:02x} XOR 03·{d:02x} = {y2:02x}&quot;)
+print(f&quot;  y3 = 03·{a:02x} XOR {b:02x} XOR {c:02x} XOR 02·{d:02x} = {y3:02x}&quot;)
+
+state = mix_columns(state)
+
+print()
+print(&quot;Sonra (4 sütunun hepsi aynı kuralla karıştı):&quot;)
+show_state(state)
+print(f&quot;Kontrol: ilk sütun = {state[0]:02x} {state[1]:02x} {state[2]:02x} {state[3]:02x}&quot;)</textarea><div class="out" hidden></div></article><h2>8. Tur anahtarını ekle; 10 turu tamamla</h2><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">state = add_round_key(state, keys[1])
+print(&quot;1. tur sonu:&quot;)
+show_state(state)
+block_cipher, encryption_trace = crypt_block(padded[:16], key)
+for step in encryption_trace:
+    print(f&quot;Tur {step[&#x27;round&#x27;]:2} {step[&#x27;name&#x27;]:15} {bytes(step[&#x27;after&#x27;]).hex(&#x27; &#x27;)}&quot;)
+print(&quot;İlk blok şifre:&quot;, block_cipher.hex())
+assert block_cipher == ciphertext[:16]</textarea><div class="out" hidden></div></article><h2>9. Çözme: ters işlemler ve dolguyu kaldırma</h2><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">recovered_block, decryption_trace = crypt_block(block_cipher, key, decrypt=True)
+for step in decryption_trace:
+    print(f&quot;Tur {step[&#x27;round&#x27;]:2} {step[&#x27;name&#x27;]:15} {bytes(step[&#x27;after&#x27;]).hex(&#x27; &#x27;)}&quot;)
+print(&quot;Geri gelen ilk blok:&quot;, recovered_block.hex(&quot; &quot;))
+print(&quot;Dolgu kaldırılıp UTF-8 çözülünce:&quot;, aes_decrypt(ciphertext, key))
+assert recovered_block == padded[:16]</textarea><div class="out" hidden></div></article><p>Kaynak: <a href="https://csrc.nist.gov/pubs/fips/197/final">NIST FIPS 197 — AES standardı</a></p></main><script id="aes-core" type="text/plain">
+def gf_mul(a, b):
+    """GF(2^8) çarpımı; AES indirgeme polinomu 0x11b."""
+    result = 0
+    for _ in range(8):
+        if b & 1:
+            result ^= a
+        a = ((a << 1) ^ (0x11b if a & 0x80 else 0)) & 0xff
+        b >>= 1
+    return result
+
+
+def make_sbox():
+    def inverse(x):
+        if x == 0:
+            return 0
+        y = 1
+        for _ in range(254):
+            y = gf_mul(y, x)
+        return y
+
+    def rotate(x, n):
+        return ((x << n) | (x >> (8 - n))) & 255
+
+    table = []
+    for x in range(256):
+        y = inverse(x)
+        table.append(y ^ rotate(y, 1) ^ rotate(y, 2) ^ rotate(y, 3) ^ rotate(y, 4) ^ 0x63)
+    return table
+
+
+SBOX = make_sbox()
+INV_SBOX = [SBOX.index(x) for x in range(256)]
+
+
+def sub_bytes(state, inverse=False):
+    table = INV_SBOX if inverse else SBOX
+    return [table[x] for x in state]
+
+
+def shift_rows(state, inverse=False):
+    # Sütun öncelikli: state[4 * sütun + satır].
+    direction = -1 if inverse else 1
+    return [state[4 * ((c + direction * r) % 4) + r]
+            for c in range(4) for r in range(4)]
+
+
+def mix_columns(state, inverse=False):
+    matrix = ([[14, 11, 13, 9], [9, 14, 11, 13],
+               [13, 9, 14, 11], [11, 13, 9, 14]] if inverse else
+              [[2, 3, 1, 1], [1, 2, 3, 1], [1, 1, 2, 3], [3, 1, 1, 2]])
+    result = []
+    for c in range(4):
+        column = state[4*c:4*c+4]
+        for row in matrix:
+            value = 0
+            for coefficient, byte in zip(row, column):
+                value ^= gf_mul(coefficient, byte)
+            result.append(value)
+    return result
+
+
+def add_round_key(state, key):
+    return [a ^ b for a, b in zip(state, key)]
+
+
+def expand_key(key):
+    if len(key) != 16:
+        raise ValueError("AES-128 anahtarı tam 16 bayt olmalı.")
+    words = [list(key[i:i+4]) for i in range(0, 16, 4)]
+    rcon = 1
+    for i in range(4, 44):
+        temp = words[i-1].copy()
+        if i % 4 == 0:
+            temp = temp[1:] + temp[:1]  # RotWord
+            temp = [SBOX[x] for x in temp]  # SubWord
+            temp[0] ^= rcon
+            rcon = gf_mul(rcon, 2)
+        words.append([a ^ b for a, b in zip(words[i-4], temp)])
+    return [sum(words[i:i+4], []) for i in range(0, 44, 4)]
+
+
+def crypt_block(block, key, decrypt=False):
+    if len(block) != 16:
+        raise ValueError("AES bloğu tam 16 bayt olmalı.")
+    keys = expand_key(key)
+    state = list(block)
+    trace = []
+
+    def record(name, round_no, before, after, round_key=None):
+        trace.append(dict(name=name, round=round_no, before=list(before),
+                          after=list(after), key=round_key))
+
+    def apply(name, round_no, operation, round_key=None):
+        nonlocal state
+        before = state.copy()
+        state = operation(state)
+        record(name, round_no, before, state, round_key)
+
+    record("Şifreli blok" if decrypt else "Dolgulu blok", 10 if decrypt else 0, state, state)
+    if not decrypt:
+        apply("AddRoundKey", 0, lambda s: add_round_key(s, keys[0]), keys[0])
+        for r in range(1, 11):
+            apply("SubBytes", r, sub_bytes)
+            apply("ShiftRows", r, shift_rows)
+            if r != 10:
+                apply("MixColumns", r, mix_columns)
+            apply("AddRoundKey", r, lambda s: add_round_key(s, keys[r]), keys[r])
+    else:
+        apply("AddRoundKey", 10, lambda s: add_round_key(s, keys[10]), keys[10])
+        for r in range(9, -1, -1):
+            apply("InvShiftRows", r, lambda s: shift_rows(s, True))
+            apply("InvSubBytes", r, lambda s: sub_bytes(s, True))
+            apply("AddRoundKey", r, lambda s: add_round_key(s, keys[r]), keys[r])
+            if r != 0:
+                apply("InvMixColumns", r, lambda s: mix_columns(s, True))
+    return bytes(state), trace
+
+
+def pad(data):
+    n = 16 - len(data) % 16
+    return data + bytes([n]) * n
+
+
+def unpad(data):
+    if not data or len(data) % 16:
+        raise ValueError("Geçersiz dolgulu veri.")
+    n = data[-1]
+    if not 1 <= n <= 16 or data[-n:] != bytes([n]) * n:
+        raise ValueError("Geçersiz PKCS#7 dolgusu.")
+    return data[:-n]
+
+
+def aes_encrypt(text, key):
+    data = pad(text.encode("utf-8"))
+    return b"".join(crypt_block(data[i:i+16], key)[0] for i in range(0, len(data), 16))
+
+
+def aes_decrypt(ciphertext, key):
+    if not ciphertext or len(ciphertext) % 16:
+        raise ValueError("Şifreli veri 16 baytın pozitif katı olmalı.")
+    data = b"".join(crypt_block(ciphertext[i:i+16], key, True)[0]
+                    for i in range(0, len(ciphertext), 16))
+    return unpad(data).decode("utf-8")
+
+
+def show_state(state):
+    for r in range(4):
+        print(" ".join(f"{state[4*c+r]:02x}" for c in range(4)))
+</script><script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script><script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/lib/codemirror.min.js"></script><script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/mode/python/python.min.js"></script><script src="aes.js"></script></body></html>

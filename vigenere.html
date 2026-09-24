@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vigenère şifreleme</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/lib/codemirror.min.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="lab">
+    <main class="page">
+      <a class="back" href="index.html">Lab</a>
+      <h1>2. Vigenère şifreleme</h1>
+      <p class="lead">
+        Kaydırmayı görmek için <a href="vigenere_animation.html">animasyona</a> bak.
+      </p>
+      <p id="status" class="status">Python yükleniyor…</p>
+      <p class="actions">
+        <button type="button" id="run-all" disabled>Tümünü çalıştır</button>
+      </p>
+
+      <article class="cell">
+        <div class="cell-bar">
+          <span class="prompt">In [&nbsp;]</span>
+          <button type="button" class="run" disabled>Çalıştır</button>
+        </div>
+        <textarea spellcheck="false">UPPER = "ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ"
+LOWER = "abcçdefgğhıijklmnoöprsştuüvyz"
+N = len(UPPER)
+
+print("Harf sayısı:", N)
+print("Alfabe:", UPPER)</textarea>
+        <div class="out" hidden></div>
+      </article>
+
+      <article class="cell">
+        <div class="cell-bar">
+          <span class="prompt">In [&nbsp;]</span>
+          <button type="button" class="run" disabled>Çalıştır</button>
+        </div>
+        <textarea spellcheck="false">def letter_index(character):
+    if character in UPPER:
+        return UPPER.index(character)
+    if character in LOWER:
+        return LOWER.index(character)
+    return None
+
+
+print("A ->", letter_index("A"))
+print("Ç ->", letter_index("Ç"))
+print("K ->", letter_index("K"))
+print("ı ->", letter_index("ı"), "   I ->", letter_index("I"))
+print("i ->", letter_index("i"), "   İ ->", letter_index("İ"))</textarea>
+        <div class="out" hidden></div>
+      </article>
+
+      <article class="cell">
+        <div class="cell-bar">
+          <span class="prompt">In [&nbsp;]</span>
+          <button type="button" class="run" disabled>Çalıştır</button>
+        </div>
+        <textarea spellcheck="false">def key_shifts(key):
+    shifts = []
+
+    for character in key:
+        shift = letter_index(character)
+
+        if shift is not None:
+            shifts.append(shift)
+
+    return shifts
+
+
+print("KEDI   ->", key_shifts("KEDI"))
+print("kedi   ->", key_shifts("kedi"))
+print("ANA    ->", key_shifts("ANA"))
+print("KEDI!  ->", key_shifts("KEDI!"))
+print("A B C  ->", key_shifts("A B C"))</textarea>
+        <div class="out" hidden></div>
+      </article>
+
+      <article class="cell">
+        <div class="cell-bar">
+          <span class="prompt">In [&nbsp;]</span>
+          <button type="button" class="run" disabled>Çalıştır</button>
+        </div>
+        <textarea spellcheck="false">def vigenere_encrypt(text, key):
+    shifts = key_shifts(key)
+    if not shifts:
+        return text
+    result = ""
+    i = 0
+
+    for character in text:
+        if character in UPPER:
+            alphabet = UPPER
+        elif character in LOWER:
+            alphabet = LOWER
+        else:
+            result += character
+            continue
+
+        shift = shifts[i % len(shifts)]
+        index = alphabet.index(character)
+        result += alphabet[(index + shift) % N]
+        i += 1
+
+    return result
+
+
+def vigenere_decrypt(ciphertext, key):
+    shifts = key_shifts(key)
+    if not shifts:
+        return ciphertext
+    result = ""
+    i = 0
+
+    for character in ciphertext:
+        if character in UPPER:
+            alphabet = UPPER
+        elif character in LOWER:
+            alphabet = LOWER
+        else:
+            result += character
+            continue
+
+        shift = shifts[i % len(shifts)]
+        index = alphabet.index(character)
+        result += alphabet[(index - shift) % N]
+        i += 1
+
+    return result</textarea>
+        <div class="out" hidden></div>
+      </article>
+
+      <article class="cell">
+        <div class="cell-bar">
+          <span class="prompt">In [&nbsp;]</span>
+          <button type="button" class="run" disabled>Çalıştır</button>
+        </div>
+        <textarea spellcheck="false">text = "Anahtar yalnızca yetkili alıcıyla paylaşılacaktır"
+key = "KEDI"
+
+ciphertext = vigenere_encrypt(text, key)
+
+print("Plaintext :", text)
+print("Key       :", key)
+print("Ciphertext:", ciphertext)</textarea>
+        <div class="out" hidden></div>
+      </article>
+
+      <article class="cell">
+        <div class="cell-bar">
+          <span class="prompt">In [&nbsp;]</span>
+          <button type="button" class="run" disabled>Çalıştır</button>
+        </div>
+        <textarea spellcheck="false">decrypted_text = vigenere_decrypt(ciphertext, key)
+
+print("Ciphertext    :", ciphertext)
+print("Decrypted text:", decrypted_text)</textarea>
+        <div class="out" hidden></div>
+      </article>
+
+      <article class="cell">
+        <div class="cell-bar">
+          <span class="prompt">In [&nbsp;]</span>
+          <button type="button" class="run" disabled>Çalıştır</button>
+        </div>
+        <textarea spellcheck="false">def show_vigenere_steps(text, key):
+    shifts = key_shifts(key)
+    letters = [character for character in key if letter_index(character) is not None]
+    print("Karakter\tAnahtar\tKaydırma\tİşlem\tSonuç")
+    i = 0
+
+    for character in text:
+        if character not in UPPER and character not in LOWER:
+            continue
+
+        alphabet = UPPER if character in UPPER else LOWER
+        key_letter = letters[i % len(letters)]
+        shift = shifts[i % len(shifts)]
+        index = alphabet.index(character)
+        new_index = (index + shift) % N
+        result = alphabet[new_index]
+        print(
+            f"{character}\t{key_letter}\t{shift}\t({index} + {shift}) % {N}\t{result}"
+        )
+        i += 1
+
+
+show_vigenere_steps(text, key)</textarea>
+        <div class="out" hidden></div>
+      </article>
+
+      <article class="cell">
+        <div class="cell-bar">
+          <span class="prompt">In [&nbsp;]</span>
+          <button type="button" class="run" disabled>Çalıştır</button>
+        </div>
+        <textarea spellcheck="false">def visualize_vigenere(text, key):
+    letters = [character for character in key if letter_index(character) is not None]
+    stream = []
+    i = 0
+    for character in text:
+        if character in UPPER or character in LOWER:
+            key_letter = letters[i % len(letters)]
+            if key_letter in LOWER:
+                key_letter = UPPER[LOWER.index(key_letter)]
+            stream.append(key_letter)
+            i += 1
+        else:
+            stream.append("·")
+
+    shown = ["·" if character == " " else character for character in text]
+    cipher = ["·" if character == " " else character for character in vigenere_encrypt(text, key)]
+    print("Açık :", " ".join(shown))
+    print("Anahtar:", " ".join(stream))
+    print("Şifre:", " ".join(cipher))
+
+
+visualize_vigenere(text, key)</textarea>
+        <div class="out" hidden></div>
+      </article>
+    </main>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/lib/codemirror.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/mode/python/python.min.js"></script>
+    <script src="sezar.js"></script>
+  </body>
+</html>

@@ -1,0 +1,104 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SHA-256 notebook</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="sha256.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/lib/codemirror.min.css"></head><body class="lab"><main class="page"><a class="back" href="index.html">Lab</a><h1>5. SHA-256 özetleme</h1><p class="lead">“merhaba”nın 256 bitlik özetini üret ve algoritmanın ilk bloğunu incele.</p><p><a href="sha256_animation.html">Animasyonu aç</a> · <a href="sha256_file.html">Dosya kontrol aracı</a> · <a href="notebooks/SHA256.ipynb" download>Jupyter notebook indir</a></p><p class="sha-note">SHA-256 şifreleme değildir. Özetten metne geri dönüş işlemi yoktur.</p><p id="status" class="status">Python yükleniyor…</p><p class="actions"><button id="run-all" disabled>Tümünü çalıştır</button></p><h2>1. Doğrudan SHA-256 özeti</h2><p>Önce Python standart kütüphanesiyle sonucu görelim.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">text = &quot;merhaba&quot;
+digest = sha256_text(text)
+print(&quot;Metin :&quot;, text)
+print(&quot;SHA-256:&quot;, digest)
+print(&quot;Hex karakter sayısı:&quot;, len(digest))</textarea><div class="out" hidden></div></article><h2>2. Metni baytlara çevir</h2><p>SHA-256 metni değil, bayt dizisini işler.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">data = text.encode(&quot;utf-8&quot;)
+print(&quot;Baytlar:&quot;, list(data))
+print(&quot;Hex    :&quot;, data.hex(&quot; &quot;))
+print(&quot;Bit uzunluğu:&quot;, len(data) * 8)</textarea><div class="out" hidden></div></article><h2>3. Dolgu uygula</h2><p>Bir 1 biti, yeterli sıfır ve en sona 64 bitlik mesaj uzunluğu eklenir.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">padded = pad(data)
+print(&quot;Dolgulu uzunluk:&quot;, len(padded), &quot;bayt&quot;)
+print(&quot;Dolgulu blok:&quot;, padded.hex(&quot; &quot;))
+print(&quot;Son 8 bayt:&quot;, padded[-8:].hex(&quot; &quot;))</textarea><div class="out" hidden></div></article><h2>4. İlk 16 kelime</h2><p>512 bitlik blok, 16 adet 32 bitlik kelimeye ayrılır.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">trace = trace_first_block(text)
+for index, word in enumerate(trace[&quot;words&quot;][:16]):
+    print(f&quot;W{index:02} = {word:08x}&quot;)</textarea><div class="out" hidden></div></article><h2>5. Mesaj planını 64 kelimeye genişlet</h2><p>W16–W63 önceki kelimelerden üretilir.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">for index, word in enumerate(trace[&quot;words&quot;][16:], 16):
+    print(f&quot;W{index:02} = {word:08x}&quot;)</textarea><div class="out" hidden></div></article><h2>6. İlk turu incele</h2><p>Sekiz durum kelimesi T1 ve T2 ile güncellenir.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">round0 = trace[&quot;rounds&quot;][0]
+for key in [&quot;w&quot;, &quot;k&quot;, &quot;S1&quot;, &quot;ch&quot;, &quot;temp1&quot;, &quot;S0&quot;, &quot;maj&quot;, &quot;temp2&quot;]:
+    print(f&quot;{key:5} = {round0[key]:08x}&quot;)
+print(&quot;Tur çıkışı:&quot;, &quot; &quot;.join(f&quot;{x:08x}&quot; for x in round0[&quot;after&quot;]))</textarea><div class="out" hidden></div></article><h2>7. 64 turun sonucu</h2><p>Son durum başlangıç değerlerine eklenir.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">print(&quot;Son durum:&quot;, &quot; &quot;.join(f&quot;{x:08x}&quot; for x in trace[&quot;state&quot;]))
+print(&quot;Özet:&quot;, trace[&quot;digest&quot;])
+assert trace[&quot;digest&quot;] == sha256_text(text)</textarea><div class="out" hidden></div></article><h2>8. Küçük değişiklik, farklı özet</h2><p>Tek karakter değiştirildiğinde özet bütünüyle değişir.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">for value in [&quot;merhaba&quot;, &quot;Merhaba&quot;, &quot;merhaba!&quot;]:
+    print(value, &quot;→&quot;, sha256_text(value))</textarea><div class="out" hidden></div></article><details><summary>SHA-256 eğitim motoru</summary><pre class="sha-code">&quot;&quot;&quot;SHA-256 eğitim uygulaması: hashlib sonucu ve ilk blok için ara değerler.&quot;&quot;&quot;
+import hashlib
+
+K = [
+0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2]
+H0=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19]
+MASK=0xffffffff
+
+def rotr(x,n): return ((x&gt;&gt;n)|(x&lt;&lt;(32-n)))&amp;MASK
+def pad(data):
+    bit_length=len(data)*8
+    result=data+b&#x27;\x80&#x27;
+    result+=b&#x27;\x00&#x27;*((56-len(result)%64)%64)
+    return result+bit_length.to_bytes(8,&#x27;big&#x27;)
+
+def trace_first_block(text=&quot;merhaba&quot;):
+    data=text.encode(&#x27;utf-8&#x27;); padded=pad(data); block=padded[:64]
+    words=[int.from_bytes(block[i:i+4],&#x27;big&#x27;) for i in range(0,64,4)]
+    for t in range(16,64):
+        s0=rotr(words[t-15],7)^rotr(words[t-15],18)^(words[t-15]&gt;&gt;3)
+        s1=rotr(words[t-2],17)^rotr(words[t-2],19)^(words[t-2]&gt;&gt;10)
+        words.append((words[t-16]+s0+words[t-7]+s1)&amp;MASK)
+    a,b,c,d,e,f,g,h=H0; rounds=[]
+    for t in range(64):
+        S1=rotr(e,6)^rotr(e,11)^rotr(e,25); ch=(e&amp;f)^((~e)&amp;g)
+        temp1=(h+S1+ch+K[t]+words[t])&amp;MASK
+        S0=rotr(a,2)^rotr(a,13)^rotr(a,22); maj=(a&amp;b)^(a&amp;c)^(b&amp;c)
+        temp2=(S0+maj)&amp;MASK
+        before=[a,b,c,d,e,f,g,h]
+        h,g,f,e,d,c,b,a=g,f,e,(d+temp1)&amp;MASK,c,b,a,(temp1+temp2)&amp;MASK
+        rounds.append(dict(t=t,before=before,w=words[t],k=K[t],S1=S1,ch=ch,temp1=temp1,S0=S0,maj=maj,temp2=temp2,after=[a,b,c,d,e,f,g,h]))
+    state=[(x+y)&amp;MASK for x,y in zip(H0,[a,b,c,d,e,f,g,h])]
+    return dict(text=text,data=list(data),padded=list(padded),words=words,rounds=rounds,state=state,digest=&#x27;&#x27;.join(f&#x27;{x:08x}&#x27; for x in state))
+
+def sha256_text(text): return hashlib.sha256(text.encode(&#x27;utf-8&#x27;)).hexdigest()
+</pre></details></main><script id="sha-core" type="text/plain">"""SHA-256 eğitim uygulaması: hashlib sonucu ve ilk blok için ara değerler."""
+import hashlib
+
+K = [
+0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2]
+H0=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19]
+MASK=0xffffffff
+
+def rotr(x,n): return ((x>>n)|(x<<(32-n)))&MASK
+def pad(data):
+    bit_length=len(data)*8
+    result=data+b'\x80'
+    result+=b'\x00'*((56-len(result)%64)%64)
+    return result+bit_length.to_bytes(8,'big')
+
+def trace_first_block(text="merhaba"):
+    data=text.encode('utf-8'); padded=pad(data); block=padded[:64]
+    words=[int.from_bytes(block[i:i+4],'big') for i in range(0,64,4)]
+    for t in range(16,64):
+        s0=rotr(words[t-15],7)^rotr(words[t-15],18)^(words[t-15]>>3)
+        s1=rotr(words[t-2],17)^rotr(words[t-2],19)^(words[t-2]>>10)
+        words.append((words[t-16]+s0+words[t-7]+s1)&MASK)
+    a,b,c,d,e,f,g,h=H0; rounds=[]
+    for t in range(64):
+        S1=rotr(e,6)^rotr(e,11)^rotr(e,25); ch=(e&f)^((~e)&g)
+        temp1=(h+S1+ch+K[t]+words[t])&MASK
+        S0=rotr(a,2)^rotr(a,13)^rotr(a,22); maj=(a&b)^(a&c)^(b&c)
+        temp2=(S0+maj)&MASK
+        before=[a,b,c,d,e,f,g,h]
+        h,g,f,e,d,c,b,a=g,f,e,(d+temp1)&MASK,c,b,a,(temp1+temp2)&MASK
+        rounds.append(dict(t=t,before=before,w=words[t],k=K[t],S1=S1,ch=ch,temp1=temp1,S0=S0,maj=maj,temp2=temp2,after=[a,b,c,d,e,f,g,h]))
+    state=[(x+y)&MASK for x,y in zip(H0,[a,b,c,d,e,f,g,h])]
+    return dict(text=text,data=list(data),padded=list(padded),words=words,rounds=rounds,state=state,digest=''.join(f'{x:08x}' for x in state))
+
+def sha256_text(text): return hashlib.sha256(text.encode('utf-8')).hexdigest()
+</script><script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script><script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/lib/codemirror.min.js"></script><script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/mode/python/python.min.js"></script><script src="sha256.js"></script></body></html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RSA notebook</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="rsa.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/lib/codemirror.min.css"></head><body class="lab"><main class="page"><a class="back" href="index.html">Lab</a><h1>4. RSA şifreleme</h1><p><a href="rsa_animation.html">Animasyonu aç</a> · <a href="notebooks/RSA.ipynb" download>Jupyter notebook indir</a> · <a href="rsa_core.py" download>Python kaynağı</a></p><p id="status" class="status">Python yükleniyor…</p><p class="actions"><button id="run-all" disabled>Tümünü çalıştır</button></p><h2>1. Doğrudan şifrele ve çöz</h2><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">text = &quot;merhaba&quot;
+keys = make_keys(p=3, q=11, e=3)
+ciphertext = encrypt(text, keys)
+recovered = decrypt(ciphertext, keys)
+print(&quot;Açık metin   :&quot;, text)
+print(&quot;Açık anahtar :&quot;, (keys[&quot;n&quot;], keys[&quot;e&quot;]))
+print(&quot;Özel anahtar:&quot;, (keys[&quot;n&quot;], keys[&quot;d&quot;]))
+print(&quot;Şifreli      :&quot;, ciphertext)
+print(&quot;Çözülmüş     :&quot;, recovered)
+assert recovered == text</textarea><div class="out" hidden></div></article><h2>2. Harfleri küçük sayılara çevir</h2><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">values = encode_text(text)
+for character, value in zip(text, values):
+    print(f&quot;{character} → {value}&quot;)
+print(&quot;Sayı dizisi:&quot;, values)
+assert all(0 &lt;= value &lt; keys[&quot;n&quot;] for value in values)</textarea><div class="out" hidden></div></article><h2>3. Anahtarları üret</h2><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">p, q, e = 3, 11, 3
+n = p * q
+phi = (p - 1) * (q - 1)
+d = pow(e, -1, phi)
+print(f&quot;n = {p} × {q} = {n}&quot;)
+print(f&quot;φ(n) = ({p}−1) × ({q}−1) = {phi}&quot;)
+print(f&quot;e = {e}&quot;)
+print(f&quot;d = {d}; çünkü {e} × {d} = {e*d} = 1 + {phi}&quot;)
+print(&quot;Açık anahtar :&quot;, (n, e))
+print(&quot;Özel anahtar:&quot;, (n, d))</textarea><div class="out" hidden></div></article><h2>4. İlk harfi şifrele</h2><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">message = values[0]
+encrypted = pow(message, e, n)
+print(f&quot;c = {message}^{e} mod {n}&quot;)
+print(f&quot;  = {message**e} mod {n}&quot;)
+print(f&quot;  = {encrypted}&quot;)
+assert encrypted == ciphertext[0] == 9</textarea><div class="out" hidden></div></article><h2>5. Bütün harfleri şifrele</h2><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">for character, message, encrypted in zip(text, values, ciphertext):
+    print(f&quot;{character}: {message}^{e} mod {n} = {encrypted}&quot;)
+print(&quot;Şifreli dizi:&quot;, ciphertext)</textarea><div class="out" hidden></div></article><h2>6. Özel anahtarla çöz</h2><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">decoded = []
+for encrypted in ciphertext:
+    message = pow(encrypted, d, n)
+    decoded.append(message)
+    print(f&quot;{encrypted}^{d} mod {n} = {message}&quot;)
+print(&quot;Çözülen sayılar:&quot;, decoded)
+print(&quot;Metin:&quot;, decode_values(decoded))
+assert decoded == values</textarea><div class="out" hidden></div></article></main><script id="rsa-core" type="text/plain">from math import gcd
+
+ALPHABET = "abcçdefgğhıijklmnoöprsştuüvyz"
+
+def encode_text(text):
+    values = []
+    for character in text.lower():
+        if character not in ALPHABET:
+            raise ValueError(f"Bu örnekte desteklenmeyen karakter: {character!r}")
+        values.append(ALPHABET.index(character))
+    return values
+
+def decode_values(values):
+    if any(not isinstance(value, int) or not 0 <= value < len(ALPHABET) for value in values):
+        raise ValueError("Çözülen değer Türk alfabesi aralığında değil.")
+    return "".join(ALPHABET[value] for value in values)
+
+def make_keys(p=3, q=11, e=3):
+    n = p * q
+    phi = (p - 1) * (q - 1)
+    if gcd(e, phi) != 1:
+        raise ValueError("e ile φ(n) aralarında asal olmalı.")
+    d = pow(e, -1, phi)
+    return dict(p=p, q=q, n=n, phi=phi, e=e, d=d)
+
+def encrypt(text, keys):
+    return [pow(value, keys["e"], keys["n"]) for value in encode_text(text)]
+
+def decrypt(ciphertext, keys):
+    values = [pow(value, keys["d"], keys["n"]) for value in ciphertext]
+    return decode_values(values)
+
+def power_steps(base, exponent, modulus):
+    result = 1
+    trace = []
+    for bit in bin(exponent)[2:]:
+        before = result
+        squared = before * before
+        square_remainder = squared % modulus
+        product = square_remainder * base if bit == "1" else None
+        result = product % modulus if product is not None else square_remainder
+        trace.append(dict(bit=bit, before=before, squared=squared,
+                          square_remainder=square_remainder,
+                          product=product, after=result))
+    return result, trace
+</script><script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script><script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/lib/codemirror.min.js"></script><script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/mode/python/python.min.js"></script><script src="rsa.js"></script></body></html>

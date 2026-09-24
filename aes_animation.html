@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AES animasyonu · Harften şifreye</title>
+  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="aes.css">
+</head>
+<body class="lab">
+<main class="page anim-page">
+  <a class="back" href="index.html">Lab</a>
+  <h1>AES: “merhaba” nasıl şifreleniyor?</h1>
+  <p class="lead">Harf → karakter kodu → UTF-8 baytı → bitler → hex → dolgu → matris → anahtar → AES turları.</p>
+  <p>Metin: <b>merhaba</b> · Anahtar: <code>0123456789abcdef</code> · <a href="aes.html">Kodları notebook’ta çalıştır</a></p>
+  <p class="aes-note">AES-128 · 16 baytlık tek blok · PKCS#7 dolgu. İleri/geri düğmeleriyle ilerle; bölüm menüsünden konu seç.</p>
+  <section class="anim-stage">
+    <div class="anim-controls lesson-controls">
+      <label>Yön<select id="direction"><option value="enc">Şifrele: harften başla</option><option value="dec">Çöz: şifreli bayttan başla</option></select></label>
+      <label>Bölüm<select id="chapter"></select></label>
+      <label>Adım süresi<select id="speed"><option value="6000">6 saniye</option><option value="12000">12 saniye</option><option value="2000">2 saniye</option></select></label>
+    </div>
+    <div class="lesson-navigation"><button id="reset">Başa dön</button><button id="prev">← Önceki</button><button id="play" class="primary">Oynat</button><button id="next">Sonraki →</button></div>
+    <label for="step">Adıma git</label><input id="step" type="range" min="0" max="1" value="0">
+    <p id="counter" class="lesson-kicker"></p><h2 id="title"></h2><p id="explanation" class="lesson-explanation" aria-live="polite"></p>
+    <div id="cards" class="lesson-cards"></div>
+    <div id="table-wrap" class="lesson-table-wrap" hidden><table id="lesson-table" class="lesson-table"></table></div>
+    <div id="matrices" class="aes-matrices" hidden>
+      <section id="before-panel"><h3 id="before-label">Girdi</h3><div id="before" class="aes-grid"></div></section>
+      <section><h3 id="after-label">Çıktı</h3><div id="after" class="aes-grid"></div></section>
+      <section id="key-panel"><h3>Bu adımın tur anahtarı</h3><div id="round-key" class="aes-grid"></div><p id="key-note"></p></section>
+    </div>
+    <p id="matrix-hint" hidden>Satır ve sütunlar 0’dan başlar. Sonuç matrisinde bir bayta tıkla: o baytın hesabı aşağıda değişir. Kırmızı: değeri değişen hücre. Mavi çerçeve: seçtiğin sonuç. Mavi zemin: bu sonuca giren kaynak baytlar.</p>
+    <section id="calculation-panel" hidden><h3>Seçilen bayt nasıl hesaplandı?</h3><pre id="calculation" class="aes-calculation" aria-live="polite"></pre></section>
+    <section id="details-panel"><h3 id="details-title">Adımın ayrıntısı</h3><pre id="details" class="aes-calculation"></pre></section>
+    <details id="sbox-panel" hidden><summary>S-box tablosunu aç · seçilen giriş vurgulanır</summary><p id="sbox-note"></p><div class="lesson-table-wrap"><table id="sbox-table" class="lesson-table sbox-table"></table></div></details>
+    <details id="key-details-panel" hidden><summary>Bu tur anahtarı nereden geldi?</summary><pre id="key-details" class="aes-calculation"></pre></details>
+    <section id="code-panel"><h3>Python ile karşılığı</h3><p class="lesson-muted">Çalıştırılabilir tam kod notebook’ta.</p><pre id="code" class="aes-calculation"></pre></section>
+    <p id="linear" class="aes-hex"></p><p id="result" class="aes-note" aria-live="polite"></p>
+  </section>
+  <p>Bu örnekte sabit anahtar ve ECB düzeni eğitim içindir. <a href="aes.html">Notebook’u aç</a> · <a href="https://csrc.nist.gov/pubs/fips/197/final">Kaynak: NIST FIPS 197 — AES</a></p>
+</main>
+<script src="aes_trace.js"></script><script src="aes_lesson.js"></script><script src="aes_animation.js"></script>
+</body></html>

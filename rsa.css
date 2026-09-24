@@ -1,0 +1,31 @@
+[hidden]{display:none!important}
+h2{font-size:1.2rem;margin-top:2rem}h3{font-size:1rem}
+.rsa-note{padding:1rem;border-left:3px solid #0550ae;background:#f2f6fc;color:#30415a}
+.rsa-code{white-space:pre-wrap;overflow-wrap:anywhere;padding:1rem;border:1px solid #ddd;background:white;font:14px/1.8 ui-monospace,Menlo,monospace}
+select{font:inherit;padding:.5rem;border:1px solid #ccc;border-radius:6px;background:white}
+.rsa-navigation{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:.5rem;background:#fafafa;padding:.65rem 0;border-bottom:1px solid #e1e6ef;margin-bottom:1rem}
+.rsa-navigation button{padding:.5rem .8rem;border-radius:7px}
+#step{width:100%;accent-color:#0550ae}
+#title{margin-top:.5rem}
+.rsa-kicker{color:#0550ae;font-size:.9rem}
+.rsa-explanation{font-size:1.08rem;max-width:70rem}
+.rsa-cards{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}
+.rsa-card{flex:1;min-width:140px;background:white;border:1px solid #d9e1ef;padding:1rem;border-radius:10px}
+.rsa-card span{display:block;color:#64748b;font-size:.85rem}
+.rsa-card strong{display:block;font:600 1.2rem/1.5 ui-monospace,Menlo,monospace;margin-top:.4rem;overflow-wrap:anywhere}
+.rsa-table-wrap{max-width:100%;overflow-x:auto;margin:1rem 0}
+.rsa-table{border-collapse:collapse;width:100%;background:white;text-align:left;font:14px/1.6 ui-monospace,Menlo,monospace}
+.rsa-table td,.rsa-table th{padding:.5rem .7rem;border:1px solid #e1e6ef;white-space:nowrap}
+.rsa-table th{font-family:system-ui,sans-serif;background:#eef2f8}
+.rsa-table .active-row{background:#dceafb;color:#073c83;font-weight:bold;box-shadow:inset 3px 0 #0550ae}
+.rsa-muted{color:#64748b;font-size:.9rem}
+.rsa-bits,.rsa-byte-buttons{display:flex;flex-wrap:wrap;gap:.45rem}
+.rsa-bit{display:grid;place-items:center;width:2.3rem;height:2.5rem;border:1px solid #d9e1ef;border-radius:6px;background:white;font:600 1.1rem monospace}
+.rsa-bit.done{background:#eef2f8;color:#64748b}
+.rsa-bit.active{background:#0550ae;color:white;border-color:#0550ae}
+.rsa-byte-buttons button{border-radius:6px;font-size:.9rem}
+.rsa-byte-buttons button[aria-pressed="true"]{background:#0550ae;color:white;border-color:#0550ae}
+.rsa-formula{font:600 1.2rem/1.6 ui-monospace,Menlo,monospace;overflow-wrap:anywhere}
+button:focus-visible,a:focus-visible,select:focus-visible{outline:3px solid #0550ae;outline-offset:3px}
+summary{cursor:pointer;font-weight:600}
+@media(max-width:720px){.page{padding:1rem}.anim-controls label,.anim-controls select{width:100%}.rsa-navigation{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}.rsa-navigation button{padding:.5rem .2rem;font-size:.82rem;white-space:nowrap}.rsa-card{min-width:110px}.rsa-table td,.rsa-table th{padding:.4rem .5rem}}

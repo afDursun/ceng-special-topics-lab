@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sezar şifreleme</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/lib/codemirror.min.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="lab">
+    <main class="page">
+      <a class="back" href="index.html">Lab</a>
+      <h1>1. Sezar şifreleme</h1>
+      <p class="lead">
+        Kaydırmayı görmek için <a href="sezar_animation.html">animasyona</a> bak.
+      </p>
+      <p id="status" class="status">Python yükleniyor…</p>
+      <p class="actions">
+        <button type="button" id="run-all" disabled>Tümünü çalıştır</button>
+      </p>
+
+      <article class="cell">
+        <div class="cell-bar">
+          <span class="prompt">In [&nbsp;]</span>
+          <button type="button" class="run" disabled>Çalıştır</button>
+        </div>
+        <textarea spellcheck="false">UPPER = "ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ"
+LOWER = "abcçdefgğhıijklmnoöprsştuüvyz"
+N = len(UPPER)
+
+
+def caesar_encrypt(text, key):
+    result = ""
+    key = key % N
+
+    for character in text:
+        if character in UPPER:
+            index = UPPER.index(character)
+            result += UPPER[(index + key) % N]
+        elif character in LOWER:
+            index = LOWER.index(character)
+            result += LOWER[(index + key) % N]
+        else:
+            result += character
+
+    return result
+
+
+def caesar_decrypt(ciphertext, key):
+    return caesar_encrypt(ciphertext, -key)</textarea>
+        <div class="out" hidden></div>
+      </article>
+
+      <article class="cell">
+        <div class="cell-bar">
+          <span class="prompt">In [&nbsp;]</span>
+          <button type="button" class="run" disabled>Çalıştır</button>
+        </div>
+        <textarea spellcheck="false">print("Harf sayısı:", N)
+print("A:", UPPER.index("A"))
+print("Ç:", UPPER.index("Ç"))
+print("I:", UPPER.index("I"), "  ı:", LOWER.index("ı"))
+print("İ:", UPPER.index("İ"), "  i:", LOWER.index("i"))
+print("Ş:", UPPER.index("Ş"))
+print("Z:", UPPER.index("Z"))</textarea>
+        <div class="out" hidden></div>
+      </article>
+
+      <article class="cell">
+        <div class="cell-bar">
+          <span class="prompt">In [&nbsp;]</span>
+          <button type="button" class="run" disabled>Çalıştır</button>
+        </div>
+        <textarea spellcheck="false">text = "Anahtar yalnızca yetkili alıcıyla paylaşılacaktır"
+key = 3
+
+ciphertext = caesar_encrypt(text, key)
+
+print("Plaintext :", text)
+print("Key       :", key % N)
+print("Ciphertext:", ciphertext)</textarea>
+        <div class="out" hidden></div>
+      </article>
+
+      <article class="cell">
+        <div class="cell-bar">
+          <span class="prompt">In [&nbsp;]</span>
+          <button type="button" class="run" disabled>Çalıştır</button>
+        </div>
+        <textarea spellcheck="false">decrypted_text = caesar_decrypt(ciphertext, key)
+
+print("Ciphertext    :", ciphertext)
+print("Decrypted text:", decrypted_text)</textarea>
+        <div class="out" hidden></div>
+      </article>
+
+      <article class="cell">
+        <div class="cell-bar">
+          <span class="prompt">In [&nbsp;]</span>
+          <button type="button" class="run" disabled>Çalıştır</button>
+        </div>
+        <textarea spellcheck="false">def show_caesar_steps(text, key):
+    key = key % N
+    print("Karakter\tİndeks\tİşlem\tYeni indeks\tSonuç")
+
+    for character in text:
+        if character in UPPER:
+            alphabet = UPPER
+        elif character in LOWER:
+            alphabet = LOWER
+        else:
+            continue
+
+        alphabet_index = alphabet.index(character)
+        encrypted_index = (alphabet_index + key) % N
+        encrypted_character = alphabet[encrypted_index]
+        operation = f"({alphabet_index} + {key}) % {N}"
+        print(
+            f"{character}\t{alphabet_index}\t{operation}\t{encrypted_index}\t{encrypted_character}"
+        )
+
+
+show_caesar_steps(text, key)</textarea>
+        <div class="out" hidden></div>
+      </article>
+
+      <article class="cell">
+        <div class="cell-bar">
+          <span class="prompt">In [&nbsp;]</span>
+          <button type="button" class="run" disabled>Çalıştır</button>
+        </div>
+        <textarea spellcheck="false">def visualize_caesar_alphabet(key):
+    key = key % N
+    cipher = "".join(UPPER[(i + key) % N] for i in range(N))
+    print("Açık :", " ".join(UPPER))
+    print("Şifre:", " ".join(cipher))
+
+
+visualize_caesar_alphabet(key)</textarea>
+        <div class="out" hidden></div>
+      </article>
+    </main>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/lib/codemirror.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/mode/python/python.min.js"></script>
+    <script src="sezar.js"></script>
+  </body>
+</html>

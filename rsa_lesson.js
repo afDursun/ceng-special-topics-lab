@@ -1,0 +1,1 @@
+window.RSA_SMALL = {"alphabet": "abcçdefgğhıijklmnoöprsştuüvyz", "text": "merhaba", "values": [15, 5, 20, 9, 0, 1, 0], "cipher": [9, 26, 14, 3, 0, 1, 0], "keys": {"p": 3, "q": 11, "n": 33, "phi": 20, "e": 3, "d": 7}};

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sezar animasyonu</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="lab">
+    <main class="page anim-page">
+      <a class="back" href="index.html">Lab</a>
+
+      <header class="anim-hero">
+        <h1>Sezar animasyonu</h1>
+        <p class="lead">
+          Her harf Türk alfabesinde anahtar kadar sağa kayar. Siyah kutu
+          o anki adım, kırmızı kutu varış harfidir.
+        </p>
+      </header>
+
+      <section class="anim-stage">
+        <div class="anim-controls">
+          <label>
+            Metin
+            <input id="text" type="text" value="MERHABA" maxlength="24" />
+          </label>
+          <label>
+            Anahtar
+            <input id="key" type="number" value="3" min="1" max="28" />
+          </label>
+          <button type="button" class="primary" id="play">Başlat</button>
+          <button type="button" id="next" disabled>Sonraki</button>
+        </div>
+
+        <div class="anim-eq">
+          <div class="eq-box">
+            <span class="eq-label">Harf</span>
+            <strong id="eq-from">—</strong>
+          </div>
+          <span class="eq-op">+</span>
+          <div class="eq-box">
+            <span class="eq-label">Anahtar</span>
+            <strong id="eq-key">3</strong>
+          </div>
+          <span class="eq-op">=</span>
+          <div class="eq-box result">
+            <span class="eq-label">Şifre</span>
+            <strong id="eq-to">—</strong>
+          </div>
+        </div>
+        <p id="eq-math" class="anim-formula">indeks + anahtar (mod 29)</p>
+        <p id="caption" class="anim-caption">Başlat’a bas; sonra Sonraki ile karakter karakter ilerle.</p>
+
+        <div class="anim-words">
+          <div class="anim-col">
+            <span class="anim-kicker">Açık metin</span>
+            <div id="plain" class="tiles"></div>
+          </div>
+          <div class="anim-col">
+            <span class="anim-kicker">Şifreli metin</span>
+            <div id="cipher" class="tiles"></div>
+          </div>
+        </div>
+
+        <div class="anim-track-block">
+          <div class="anim-track-head">
+            <span>Türk alfabesi · 29 harf</span>
+            <span class="legend">
+              <i class="lg from"></i> başlangıç
+              <i class="lg here"></i> adım
+              <i class="lg to"></i> hedef
+            </span>
+          </div>
+          <div class="anim-track-wrap">
+            <div id="track" class="anim-track"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script src="sezar_animation.js"></script>
+  </body>
+</html>

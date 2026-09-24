@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RSA animasyonu · Harften şifreye</title>
+  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="rsa.css">
+</head>
+<body class="lab">
+<main class="page anim-page">
+  <a class="back" href="index.html">Lab</a>
+  <h1>RSA: “merhaba” nasıl şifreleniyor?</h1>
+  <p class="lead">Harf → sayı → asal sayılar → açık ve özel anahtar → modüler kuvvet → şifreli sayı.</p>
+  <p><a href="rsa.html">Kodları notebook’ta çalıştır</a> · <a href="notebooks/RSA.ipynb" download>Jupyter notebook indir</a></p>
+  <p class="rsa-note">p=3, q=11, n=33 olan küçük eğitim örneği. Harfler Türk alfabesindeki sıra numaralarıyla kodlanır.</p>
+  <section class="anim-stage">
+    <div class="anim-controls">
+      <label>Yön<select id="direction"><option value="enc">Şifrele</option><option value="dec">Çöz</option></select></label>
+      <label>Bölüm<select id="chapter"></select></label>
+      <label>Adım süresi<select id="speed"><option value="6000">6 saniye</option><option value="12000">12 saniye</option><option value="2000">2 saniye</option></select></label>
+    </div>
+    <div class="rsa-navigation"><button id="reset">Başa dön</button><button id="prev">← Önceki</button><button id="play" class="primary">Oynat</button><button id="next">Sonraki →</button></div>
+    <label for="step">Adıma git</label><input id="step" type="range" min="0" max="1" value="0">
+    <p id="counter" class="rsa-kicker"></p>
+    <h2 id="title"></h2><p id="explanation" class="rsa-explanation" aria-live="polite"></p>
+    <section id="byte-panel" hidden><h3>Bayt seç</h3><div id="byte-buttons" class="rsa-byte-buttons"></div></section>
+    <section id="power-panel" hidden>
+      <p id="formula" class="rsa-formula"></p><h3 id="bits-label">Üssün ikilik yazımı</h3>
+      <div id="bits" class="rsa-bits" aria-labelledby="bits-label"></div>
+      <p class="rsa-muted">Mavi bit şu an işleniyor. Her bit bir kareleme adımıdır; 1 ise ek çarpma yapılır.</p>
+    </section>
+    <div id="cards" class="rsa-cards"></div>
+    <div id="table-wrap" class="rsa-table-wrap" hidden><table id="data-table" class="rsa-table"></table></div>
+    <section><h3>Adımın hesabı</h3><pre id="details" class="rsa-code" aria-live="polite"></pre></section>
+    <section><h3>Python ile karşılığı</h3><p class="rsa-muted">Çalıştırılabilir tam kod notebook’ta.</p><pre id="code" class="rsa-code"></pre></section>
+    <p id="result" class="rsa-note" hidden></p>
+  </section>
+  <p><a href="https://www.rfc-editor.org/rfc/rfc8017.html#section-5.1">Kaynak: RFC 8017 — RSA şifreleme ve çözme işlemleri</a></p>
+</main>
+<script src="rsa_lesson.js"></script><script src="rsa_animation.js"></script>
+</body></html>
