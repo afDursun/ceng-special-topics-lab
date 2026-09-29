@@ -101,7 +101,54 @@ for step in decryption_trace:
     print(f&quot;Tur {step[&#x27;round&#x27;]:2} {step[&#x27;name&#x27;]:15} {bytes(step[&#x27;after&#x27;]).hex(&#x27; &#x27;)}&quot;)
 print(&quot;Geri gelen ilk blok:&quot;, recovered_block.hex(&quot; &quot;))
 print(&quot;Dolgu kaldırılıp UTF-8 çözülünce:&quot;, aes_decrypt(ciphertext, key))
-assert recovered_block == padded[:16]</textarea><div class="out" hidden></div></article><p>Kaynak: <a href="https://csrc.nist.gov/pubs/fips/197/final">NIST FIPS 197 — AES standardı</a></p></main><script id="aes-core" type="text/plain">
+assert recovered_block == padded[:16]</textarea><div class="out" hidden></div></article><h2>10. Hex anahtarla .txt dosyasını şifrele</h2><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">key_hex = &quot;0123456789abcdef0123456789abcdef&quot;
+file_key = bytes.fromhex(key_hex)
+
+plain_path = &quot;mesaj.txt&quot;
+cipher_path = &quot;mesaj_sifreli.txt&quot;
+
+# mesaj.txt içine yazdığımız düz metin
+plain_text = &quot;Kriptografi Laboratuvarı\nAES-128 ile dosya şifreleme örneği.\n&quot;
+
+with open(plain_path, &quot;w&quot;, encoding=&quot;utf-8&quot;) as f:
+    f.write(plain_text)
+
+with open(plain_path, &quot;r&quot;, encoding=&quot;utf-8&quot;) as f:
+    file_text = f.read()
+file_bytes = file_text.encode(&quot;utf-8&quot;)
+
+padded_file = pad(file_bytes)
+file_ciphertext = b&quot;&quot;.join(
+    crypt_block(padded_file[i:i + 16], file_key)[0]
+    for i in range(0, len(padded_file), 16)
+)
+
+with open(cipher_path, &quot;w&quot;, encoding=&quot;utf-8&quot;) as f:
+    f.write(file_ciphertext.hex())
+
+print(&quot;Anahtar (hex) :&quot;, key_hex)
+print(&quot;Açık dosya    :&quot;, plain_path)
+print(&quot;İçine yazılan :&quot;)
+print(file_text, end=&quot;&quot;)
+print(&quot;Bayt sayısı   :&quot;, len(file_bytes))
+print(&quot;Şifreli dosya :&quot;, cipher_path)
+print(&quot;Şifre (hex)   :&quot;, file_ciphertext.hex())</textarea><div class="out" hidden></div></article><h2>11. Şifreli .txt dosyasını çöz ve düz metni göster</h2><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">with open(cipher_path, &quot;r&quot;, encoding=&quot;utf-8&quot;) as f:
+    stored_cipher = bytes.fromhex(f.read().strip())
+
+recovered_padded = b&quot;&quot;.join(
+    crypt_block(stored_cipher[i:i + 16], file_key, decrypt=True)[0]
+    for i in range(0, len(stored_cipher), 16)
+)
+recovered_bytes = unpad(recovered_padded)
+recovered_text = recovered_bytes.decode(&quot;utf-8&quot;)
+
+print(&quot;Şifreli dosya :&quot;, cipher_path)
+print(&quot;Şifre (hex)   :&quot;, stored_cipher.hex())
+print()
+print(&quot;Çözülmüş düz metin:&quot;)
+print(recovered_text, end=&quot;&quot;)
+assert recovered_text == file_text
+print(&quot;Kontrol: çözülen metin, mesaj.txt içine yazılanla aynı.&quot;)</textarea><div class="out" hidden></div></article><p>Kaynak: <a href="https://csrc.nist.gov/pubs/fips/197/final">NIST FIPS 197 — AES standardı</a></p></main><script id="aes-core" type="text/plain">
 def gf_mul(a, b):
     """GF(2^8) çarpımı; AES indirgeme polinomu 0x11b."""
     result = 0
