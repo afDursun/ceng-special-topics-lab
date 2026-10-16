@@ -1,22 +1,44 @@
-<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SHA-256 notebook</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="sha256.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/lib/codemirror.min.css"></head><body class="lab"><main class="page"><a class="back" href="index.html">Lab</a><h1>5. SHA-256 özetleme</h1><p class="lead">“merhaba”nın 256 bitlik özetini üret ve algoritmanın ilk bloğunu incele.</p><p><a href="sha256_animation.html">Animasyonu aç</a> · <a href="sha256_file.html">Dosya kontrol aracı</a> · <a href="notebooks/SHA256.ipynb" download>Jupyter notebook indir</a></p><p class="sha-note">SHA-256 şifreleme değildir. Özetten metne geri dönüş işlemi yoktur.</p><p id="status" class="status">Python yükleniyor…</p><p class="actions"><button id="run-all" disabled>Tümünü çalıştır</button></p><h2>1. Doğrudan SHA-256 özeti</h2><p>Önce Python standart kütüphanesiyle sonucu görelim.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">text = &quot;merhaba&quot;
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SHA-256 notebook</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="sha256.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/lib/codemirror.min.css"></head><body class="lab"><main class="page"><a class="back" href="index.html">Lab</a><h1>5. SHA-256 özetleme</h1><p class="lead">“merhaba”nın 256 bitlik özetini üret ve algoritmanın ilk bloğunu incele.</p><p><a href="sha256_animation.html">Animasyonu aç</a> · <a href="sha256_file.html">Dosya kontrol aracı</a> · <a href="sha256_core.py" download>Tam Python kodunu indirmek için tıklayınız</a> · <a href="notebooks/SHA256.ipynb" download>Jupyter notebook indir</a></p><p class="sha-note">SHA-256 şifreleme değildir. Özetten metne geri dönüş işlemi yoktur.</p><p id="status" class="status">Python yükleniyor…</p><p class="actions"><button id="run-all" disabled>Tümünü çalıştır</button></p><h2>1. Doğrudan SHA-256 özeti</h2><p>Önce Python standart kütüphanesiyle sonucu görelim.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">from sha256_core import sha256_text
+
+text = &quot;merhaba&quot;
 digest = sha256_text(text)
 print(&quot;Metin :&quot;, text)
 print(&quot;SHA-256:&quot;, digest)
-print(&quot;Hex karakter sayısı:&quot;, len(digest))</textarea><div class="out" hidden></div></article><h2>2. Metni baytlara çevir</h2><p>SHA-256 metni değil, bayt dizisini işler.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">data = text.encode(&quot;utf-8&quot;)
+print(&quot;Hex karakter sayısı:&quot;, len(digest))</textarea><div class="out" hidden></div></article><h2>2. Metni baytlara çevir</h2><p>SHA-256 metni değil, bayt dizisini işler.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">text = &quot;merhaba&quot;
+data = text.encode(&quot;utf-8&quot;)
 print(&quot;Baytlar:&quot;, list(data))
 print(&quot;Hex    :&quot;, data.hex(&quot; &quot;))
-print(&quot;Bit uzunluğu:&quot;, len(data) * 8)</textarea><div class="out" hidden></div></article><h2>3. Dolgu uygula</h2><p>Bir 1 biti, yeterli sıfır ve en sona 64 bitlik mesaj uzunluğu eklenir.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">padded = pad(data)
+print(&quot;Bit uzunluğu:&quot;, len(data) * 8)</textarea><div class="out" hidden></div></article><h2>3. Dolgu uygula</h2><p>Bir 1 biti, yeterli sıfır ve en sona 64 bitlik mesaj uzunluğu eklenir.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">from sha256_core import pad
+
+text = &quot;merhaba&quot;
+data = text.encode(&quot;utf-8&quot;)
+padded = pad(data)
 print(&quot;Dolgulu uzunluk:&quot;, len(padded), &quot;bayt&quot;)
 print(&quot;Dolgulu blok:&quot;, padded.hex(&quot; &quot;))
-print(&quot;Son 8 bayt:&quot;, padded[-8:].hex(&quot; &quot;))</textarea><div class="out" hidden></div></article><h2>4. İlk 16 kelime</h2><p>512 bitlik blok, 16 adet 32 bitlik kelimeye ayrılır.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">trace = trace_first_block(text)
+print(&quot;Son 8 bayt:&quot;, padded[-8:].hex(&quot; &quot;))</textarea><div class="out" hidden></div></article><h2>4. İlk 16 kelime</h2><p>512 bitlik blok, 16 adet 32 bitlik kelimeye ayrılır.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">from sha256_core import trace_first_block
+
+text = &quot;merhaba&quot;
+trace = trace_first_block(text)
 for index, word in enumerate(trace[&quot;words&quot;][:16]):
-    print(f&quot;W{index:02} = {word:08x}&quot;)</textarea><div class="out" hidden></div></article><h2>5. Mesaj planını 64 kelimeye genişlet</h2><p>W16–W63 önceki kelimelerden üretilir.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">for index, word in enumerate(trace[&quot;words&quot;][16:], 16):
-    print(f&quot;W{index:02} = {word:08x}&quot;)</textarea><div class="out" hidden></div></article><h2>6. İlk turu incele</h2><p>Sekiz durum kelimesi T1 ve T2 ile güncellenir.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">round0 = trace[&quot;rounds&quot;][0]
+    print(f&quot;W{index:02} = {word:08x}&quot;)</textarea><div class="out" hidden></div></article><h2>5. Mesaj planını 64 kelimeye genişlet</h2><p>W16–W63 önceki kelimelerden üretilir.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">from sha256_core import trace_first_block
+
+trace = trace_first_block(&quot;merhaba&quot;)
+for index, word in enumerate(trace[&quot;words&quot;][16:], 16):
+    print(f&quot;W{index:02} = {word:08x}&quot;)</textarea><div class="out" hidden></div></article><h2>6. İlk turu incele</h2><p>Sekiz durum kelimesi T1 ve T2 ile güncellenir.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">from sha256_core import trace_first_block
+
+trace = trace_first_block(&quot;merhaba&quot;)
+round0 = trace[&quot;rounds&quot;][0]
 for key in [&quot;w&quot;, &quot;k&quot;, &quot;S1&quot;, &quot;ch&quot;, &quot;temp1&quot;, &quot;S0&quot;, &quot;maj&quot;, &quot;temp2&quot;]:
     print(f&quot;{key:5} = {round0[key]:08x}&quot;)
-print(&quot;Tur çıkışı:&quot;, &quot; &quot;.join(f&quot;{x:08x}&quot; for x in round0[&quot;after&quot;]))</textarea><div class="out" hidden></div></article><h2>7. 64 turun sonucu</h2><p>Son durum başlangıç değerlerine eklenir.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">print(&quot;Son durum:&quot;, &quot; &quot;.join(f&quot;{x:08x}&quot; for x in trace[&quot;state&quot;]))
+print(&quot;Tur çıkışı:&quot;, &quot; &quot;.join(f&quot;{x:08x}&quot; for x in round0[&quot;after&quot;]))</textarea><div class="out" hidden></div></article><h2>7. 64 turun sonucu</h2><p>Son durum başlangıç değerlerine eklenir.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">from sha256_core import sha256_text, trace_first_block
+
+text = &quot;merhaba&quot;
+trace = trace_first_block(text)
+print(&quot;Son durum:&quot;, &quot; &quot;.join(f&quot;{x:08x}&quot; for x in trace[&quot;state&quot;]))
 print(&quot;Özet:&quot;, trace[&quot;digest&quot;])
-assert trace[&quot;digest&quot;] == sha256_text(text)</textarea><div class="out" hidden></div></article><h2>8. Küçük değişiklik, farklı özet</h2><p>Tek karakter değiştirildiğinde özet bütünüyle değişir.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">for value in [&quot;merhaba&quot;, &quot;Merhaba&quot;, &quot;merhaba!&quot;]:
+assert trace[&quot;digest&quot;] == sha256_text(text)</textarea><div class="out" hidden></div></article><h2>8. Küçük değişiklik, farklı özet</h2><p>Tek karakter değiştirildiğinde özet bütünüyle değişir.</p><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">from sha256_core import sha256_text
+
+for value in [&quot;merhaba&quot;, &quot;Merhaba&quot;, &quot;merhaba!&quot;]:
     print(value, &quot;→&quot;, sha256_text(value))</textarea><div class="out" hidden></div></article><details><summary>SHA-256 eğitim motoru</summary><pre class="sha-code">&quot;&quot;&quot;SHA-256 eğitim uygulaması: hashlib sonucu ve ilk blok için ara değerler.&quot;&quot;&quot;
 import hashlib
 

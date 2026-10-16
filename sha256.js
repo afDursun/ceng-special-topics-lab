@@ -55,7 +55,9 @@ async function main(){
   document.getElementById('run-all').onclick=()=>runBatch(cells);
   try{
     python=await loadPyodide({indexURL:'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/'});
-    await python.runPythonAsync(document.getElementById('sha-core').textContent);
+    const core=document.getElementById('sha-core').textContent;
+    python.FS.writeFile('sha256_core.py', core);
+    await python.runPythonAsync(core);
     status('Hazır. Hücreleri sırayla çalıştır.');lock(false);
   }catch(error){python=null;status('Python yüklenemedi. İnternet bağlantısını kontrol edip sayfayı yenile.',true);lock(true);}
 }
