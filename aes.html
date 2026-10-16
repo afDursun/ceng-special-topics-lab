@@ -132,7 +132,22 @@ print(&quot;İçine yazılan :&quot;)
 print(file_text, end=&quot;&quot;)
 print(&quot;Bayt sayısı   :&quot;, len(file_bytes))
 print(&quot;Şifreli dosya :&quot;, cipher_path)
-print(&quot;Şifre (hex)   :&quot;, file_ciphertext.hex())</textarea><div class="out" hidden></div></article><h2>11. Şifreli .txt dosyasını çöz ve düz metni göster</h2><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">with open(cipher_path, &quot;r&quot;, encoding=&quot;utf-8&quot;) as f:
+print(&quot;Şifre (hex)   :&quot;, file_ciphertext.hex())</textarea><div class="out" hidden></div></article><h2>11. Şifreli .txt dosyasını çöz ve düz metni göster</h2><article class="cell"><div class="cell-bar"><span class="prompt">In [ ]</span><button class="run" disabled>Çalıştır</button></div><textarea spellcheck="false">import os
+
+key_hex = &quot;0123456789abcdef0123456789abcdef&quot;
+file_key = bytes.fromhex(key_hex)
+
+cipher_path = &quot;mesaj_sifreli.txt&quot;
+
+if not os.path.exists(cipher_path):
+    with open(cipher_path, &quot;w&quot;, encoding=&quot;utf-8&quot;) as f:
+        f.write(
+            &quot;77f604e02ee77d9b8fa6be57d3885a386848c6e6283f30a2d02d4d2d6a303c6d&quot;
+            &quot;84489fe3227a20e38b0959e9c33cbf67cd65cde8240c3467e2e84f41557bf82d&quot;
+            &quot;ff9a81d44fbb5d473b9958e94fccca1a&quot;
+        )
+
+with open(cipher_path, &quot;r&quot;, encoding=&quot;utf-8&quot;) as f:
     stored_cipher = bytes.fromhex(f.read().strip())
 
 recovered_padded = b&quot;&quot;.join(
@@ -142,13 +157,12 @@ recovered_padded = b&quot;&quot;.join(
 recovered_bytes = unpad(recovered_padded)
 recovered_text = recovered_bytes.decode(&quot;utf-8&quot;)
 
+print(&quot;Anahtar (hex) :&quot;, key_hex)
 print(&quot;Şifreli dosya :&quot;, cipher_path)
 print(&quot;Şifre (hex)   :&quot;, stored_cipher.hex())
 print()
 print(&quot;Çözülmüş düz metin:&quot;)
-print(recovered_text, end=&quot;&quot;)
-assert recovered_text == file_text
-print(&quot;Kontrol: çözülen metin, mesaj.txt içine yazılanla aynı.&quot;)</textarea><div class="out" hidden></div></article><p>Kaynak: <a href="https://csrc.nist.gov/pubs/fips/197/final">NIST FIPS 197 — AES standardı</a></p></main><script id="aes-core" type="text/plain">
+print(recovered_text, end=&quot;&quot;)</textarea><div class="out" hidden></div></article><p>Kaynak: <a href="https://csrc.nist.gov/pubs/fips/197/final">NIST FIPS 197 — AES standardı</a></p></main><script id="aes-core" type="text/plain">
 def gf_mul(a, b):
     """GF(2^8) çarpımı; AES indirgeme polinomu 0x11b."""
     result = 0
